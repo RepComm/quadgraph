@@ -1,0 +1,30 @@
+body {
+    background-color: rgb(83, 83, 83);
+    margin: 0px;
+    padding: 0px;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+#canvas {
+    top: 0%;
+    left: 10%;
+    width: 80%;
+    height: 80%;
+    border-radius:1em;
+    position: absolute;
+    background-color: black;
+}
+#formula {
+    position:absolute;
+    bottom:2.5%;
+    left:10%;
+    width:80%;
+    height:15%;
+    border-radius:1em;
+    background-color:black;
+    text-align:center;
+    font-size:xx-large;
+    color:white;
+    font-family:'Courier New', Courier, monospace;
+}
