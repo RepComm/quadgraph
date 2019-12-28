@@ -3,12 +3,21 @@ import { rect, on } from "./aliases.js";
 import { Utils, radians, ndist } from "./math.js";
 
 class Nomial {
+    /**
+     * @param {Number} coefficient of nomial
+     * @param {Number} exponent of nomial
+     * @param {String} varname variable of nomial (typically x), an input
+     */
     constructor(coefficient, exponent, varname) {
         this.coefficient = coefficient;
         this.varname = varname;
         this.exponent = exponent;
         this.error = "";
     }
+    /** Convert this nomial back to string representation
+     * @param {Boolean} includePosSign
+     * @returns {String}
+     */
     toString(includePosSign = true) {
         let result = "";
         if (this.coefficient) {
@@ -85,6 +94,10 @@ class Nomial {
         result.error = error;
         return result;
     }
+    /** Resolves the function given its inputs
+     * @param {Map<String, Number} inputs 
+     * @returns {Number}
+     */
     resolve(inputs) {
         if (this.varname) {
             let keys = Object.keys(inputs);
@@ -103,6 +116,9 @@ class Nomial {
 }
 
 class Polynomial {
+    /** Internal, use Polynomial.fromString
+     * @param {Array<String>} components 
+     */
     constructor(components) {
         this.components = components;
         this.error = "";
@@ -122,6 +138,10 @@ class Polynomial {
         }
         return str.substring(start);
     }
+    /** Generate a polynomial from a string
+     * @param {String} formula 
+     * @returns {Polynomial}
+     */
     static fromString(formula) {
         formula = formula.replace(/ /g, "");
         let components = [];
@@ -142,6 +162,10 @@ class Polynomial {
         result.error = error;
         return result;
     }
+    /** Convert back to string representation
+     * May be incorrect if parsing failed
+     * @returns {String} representation of polynomial function
+     */
     toString() {
         let result = "";
         for (let i = 0; i < this.components.length; i++) {
@@ -153,6 +177,11 @@ class Polynomial {
         }
         return result;
     }
+    /** Resolve the function given its inputs
+     * Essentially a "solve for y"
+     * @param {Map<String, Number>} inputs
+     * @returns {Number} resolved number
+     */
     resolve(inputs) {
         let result = 0;
         for (let i = 0; i < this.components.length; i++) {
@@ -163,13 +192,31 @@ class Polynomial {
 }
 
 class Parabola {
+    /** Create a parabola from a string/math function
+     * @param {String} from function to parse
+     * Sets error flag when detecting parser errors
+     */
     constructor(from) {
         this.polynomial = Polynomial.fromString(from);
         this.error = this.polynomial.error;
     }
+    /** Resolves the polynomial given an x value to supply a y (output)
+     * @param {Number} x supplied value
+     * @returns {Number} y
+     */
     getY(x) {
         return this.polynomial.resolve({ x: x });
     }
+    /** Resolves the polynomial given input variables to supply an output
+     * @param {Map<String,Number>} inputs supplied values
+     * @returns {Number} y
+     */
+    rawResolve (inputs) {
+        return this.polynomial.resolve(inputs);
+    }
+    /** Shallow error detection
+     * @returns {String|false} Error message when detected, false when not
+     */
     hasError() {
         if (this.error) {
             return this.error;
@@ -183,9 +230,13 @@ class Parabola {
     }
 }
 
+/** A renderer for graphing a parabola
+ */
 class Renderer {
     /**
      * @param {HTMLCanvasElement} canvas renderer element
+     * @param {Boolean} renderGrid should the grid render or not
+     * @param {Number} gridSpacing coordinate spacing between grid vertices
      */
     constructor(canvas, renderGrid = true, gridSpacing = 1) {
         this.canvas = canvas;
@@ -229,22 +280,39 @@ class Renderer {
         requestAnimationFrame(this.renderRequestCallback);
     }
 
+    /** Set the page-space (layerX/layerY) cursor position
+     * Triggers a render
+     * @param {Integer} x 
+     * @param {Integer} y
+     */
     setCursor(x, y) {
         this.cursor.x = x;
         this.cursor.y = y;
         this.needsRender = true;
     }
 
+    /** Set the origin the viewer is viewing from
+     * Triggers a render
+     * @param {Integer} x
+     * @param {Integer} y 
+     */
     setCenter(x, y) {
         this.centerX = x;
         this.centerY = y;
         this.needsRender = true;
     }
 
+    /** Move the origin the viewer is viewing from by some amounts
+     * @param {Integer} xa move amount x
+     * @param {Integer} ya move amount y
+     */
     moveCenter(xa, ya) {
         this.setCenter(this.centerX + xa, this.centerY + ya);
     }
 
+    /** Trigger a render
+     * NOTE: May not actually render when <Renderer>.needsRender not true
+     */
     render() {
         requestAnimationFrame(this.renderRequestCallback);
         if (!this.needsRender) return;
@@ -343,11 +411,18 @@ class Renderer {
         this.ctx.restore();
     }
 
+    /** Set the viewed function (triggers a render)
+     * @param {Parabola} parabola 
+     */
     setParabola(parabola) {
         this.parabola = parabola;
         this.needsRender = true;
     }
 
+    /** Add some zoom to your room..
+     * Triggers a render
+     * @param {Number} za zoom amount
+     */
     addZoom(za) {
         this.zoom -= za;
         if (this.zoom < 8) {

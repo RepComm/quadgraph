@@ -2,8 +2,8 @@
 import {Renderer, Parabola} from "./quadgraph.js";
 import {get, on} from "./aliases.js";
 
-let canvas = get("canvas");
 
+let canvas = get("canvas");
 let renderer = new Renderer(canvas, true, 1);
 
 let formula = get("formula");
