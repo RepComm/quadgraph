@@ -397,7 +397,7 @@ class Renderer {
             }
 
             this.ctx.strokeStyle = this.graphingColor;
-            this.ctx.lineWidth = (this.gridLineWidth) / this.zoom;
+            this.ctx.lineWidth = (this.gridLineWidth * 4) / this.zoom;
             this.ctx.stroke();
 
             this.cursor.localx = -((this.cursor.x - this.drawRect.width / 2) / this.zoom) + this.centerX;
@@ -410,9 +410,15 @@ class Renderer {
                     this.nearest.distance = d;
                 }
             }
-            this.ctx.rect(this.nearest.point.x - 0.05, this.nearest.point.y - 0.05, 0.1, 0.1);
 
-            this.ctx.strokeStyle = this.graphingColor;
+            this.ctx.beginPath();
+            this.ctx.ellipse(
+                this.nearest.point.x,
+                this.nearest.point.y,
+                0.05, 0.05, 0, 0, Math.PI*2
+            );
+
+            this.ctx.strokeStyle = "green";
             this.ctx.lineWidth = (this.gridLineWidth * 4) / this.zoom;
             this.ctx.stroke();
             this.ctx.beginPath();
