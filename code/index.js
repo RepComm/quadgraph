@@ -7,7 +7,7 @@ let canvas = get("canvas");
 let renderer = new Renderer(canvas, true, 1);
 
 let formula = get("formula");
-let parabola = new Parabola("1x^2 - 2x - 4");
+let parabola = new Parabola("-1x^3 + 1x");
 renderer.setParabola(parabola);
 
 let recalcParabola = ()=>{
@@ -40,10 +40,10 @@ let speed = 10;
 let handleInput = ()=>{
     move.x = 0;
     move.y = 0;
-    if (keys.w) {move.y = speed/renderer.zoom;}
-    if (keys.a) {move.x = -speed/renderer.zoom;}
-    if (keys.d) {move.x = speed/renderer.zoom;}
-    if (keys.s) {move.y = -speed/renderer.zoom;}
+    if (keys.w) {move.y = -speed/renderer.zoom;}
+    if (keys.a) {move.x = speed/renderer.zoom;}
+    if (keys.d) {move.x = -speed/renderer.zoom;}
+    if (keys.s) {move.y = speed/renderer.zoom;}
 
     if (keys.w || keys.a || keys.d || keys.s) {
         renderer.moveCenter(move.x, move.y);

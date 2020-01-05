@@ -1,6 +1,6 @@
 
 import { rect, on } from "./aliases.js";
-import { Utils, radians, ndist } from "./math.js";
+import { Utils, radians, ndist, dist } from "./math.js";
 
 class Nomial {
     /**
@@ -248,7 +248,6 @@ class Renderer {
         this.gridLineWidth = 0.5;
 
         this.graphingColor = "blue";
-        //this.graphingXJump = 0.1;
 
         this.needsRender = true;
 
@@ -267,6 +266,8 @@ class Renderer {
         this.parabola;
 
         this.cursor = { x: 0, y: 0, localx: 0, localy: 0, };
+        this.points = new Array();
+        this.nearest = {point:undefined, distance:Infinity};
 
         this.renderRequestCallback = () => {
             this.render();
@@ -336,7 +337,7 @@ class Renderer {
         this.ctx.clearRect(0, 0, this.drawRect.width, this.drawRect.height);
         this.ctx.translate(this.drawRect.width / 2, this.drawRect.height / 2);
 
-        this.ctx.scale(this.zoom, -this.zoom);
+        this.ctx.scale(-this.zoom, this.zoom);
         this.ctx.lineWidth = this.gridLineWidth / this.zoom;
         this.ctx.translate(-this.centerX, -this.centerY);
 
@@ -375,8 +376,11 @@ class Renderer {
             let xOffset = Utils.roundTo(this.left + this.centerX, this.gridSpacing);
             let moveOrLine = false; //False = move, True = line
             let py;
+            this.points.length = 0;
+            this.nearest.distance = Infinity;
             for (let x = xOffset; x < this.right + this.centerX; x += this.gridSpacing / this.zoom) {
                 py = this.parabola.getY(x);
+                this.points.push({x:x, y:py});
                 if (py > this.bottom + this.centerY) {
                     moveOrLine = false;
                     continue;
@@ -396,15 +400,25 @@ class Renderer {
             this.ctx.lineWidth = (this.gridLineWidth) / this.zoom;
             this.ctx.stroke();
 
-            this.cursor.localx = (this.cursor.x - this.drawRect.width / 2) / this.zoom + this.centerX;
-            this.cursor.localy = (this.cursor.y - this.drawRect.height / 2) / this.zoom + this.centerY;
-            py = this.parabola.getY(this.cursor.localx);
-
-            if (ndist(py, this.cursor.localy) < 1) {
-                this.ctx.rect(this.cursor.localx - 0.05, py - 0.05, 0.1, 0.1);
+            this.cursor.localx = -((this.cursor.x - this.drawRect.width / 2) / this.zoom) + this.centerX;
+            this.cursor.localy = ((this.cursor.y - this.drawRect.height / 2) / this.zoom) + this.centerY;
+            let d;
+            for (let p of this.points) {
+                d = dist(p.x, p.y, this.cursor.localx, this.cursor.localy);
+                if (d < this.nearest.distance) {
+                    this.nearest.point = p;
+                    this.nearest.distance = d;
+                }
             }
+            this.ctx.rect(this.nearest.point.x - 0.05, this.nearest.point.y - 0.05, 0.1, 0.1);
+
             this.ctx.strokeStyle = this.graphingColor;
             this.ctx.lineWidth = (this.gridLineWidth * 4) / this.zoom;
+            this.ctx.stroke();
+            this.ctx.beginPath();
+            this.ctx.moveTo(this.cursor.localx, this.cursor.localy);
+            this.ctx.lineTo(this.nearest.point.x, this.nearest.point.y);
+            this.ctx.strokeStyle = "red";
             this.ctx.stroke();
         }
 
