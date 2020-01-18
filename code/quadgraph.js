@@ -37,19 +37,12 @@ class Nomial {
      * @param {Integer} start to start at
      */
     static scanNumber(str, start) {
+        //return str.substring(start).match(/\d+[,.]?\d*|-|\+/)[0];
         for (let i = start; i < str.length; i++) {
-            if (!str.charAt(i).match(/[0-9]|-|\+/)) {
+            if (!str.charAt(i).match(/\d|-|\+/)) {
                 return str.substring(start, i);
             }
         }
-        // try {
-        //     console.log(str.substring(start), str.substring(start).match(/^[0-9]*\.?[0-9]*$/));
-
-        //     return str.substring(start).match(/^[0-9]*\.?[0-9]*$/)[0];
-        // } catch (ex) {
-        //     //console.log(str.substring(start).match(/^\d*\.?\d*$/));
-        //     return "1";
-        // }
         return str.substring(start);
     }
     static scanLetter(str, start) {
